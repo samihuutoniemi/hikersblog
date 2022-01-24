@@ -1,0 +1,109 @@
+﻿@inherits EditArticleBase
+@page "/{blogname}/edit"
+@page "/{blogname}/edit/{fromArticle}"
+@page "/{blogname}/{urlName}/edit"
+
+@if (ApplicationState.IsLoggedIn)
+{
+    <EditForm Model="@this">
+        <div class="metadata-box">
+            <h5>Metadata</h5>
+            <div>
+                <label>Namn i URL:</label>
+                <InputText @bind-Value="Article.UrlName"></InputText>
+            </div>
+            <div>
+                <label>Föregående artikel:</label>
+                <InputText @bind-Value="PreviousArticle.UrlName"></InputText>
+            </div>
+        </div>
+
+        <h2>Dag <InputText class="editbox" @bind-Value="DateEntry.SubData" style="width: 34px"></InputText>:</h2>
+        <h2><InputText class="editbox" @bind-Value="RouteEntry.Data" style="width: 200px" placeholder="Från"></InputText>-<InputText class="editbox" @bind-Value="RouteEntry.SubData" style="width: 200px" placeholder="Till"></InputText></h2>
+
+        <p style="margin-bottom: 3px">Distans: <InputText class="editbox" @bind-Value="DistanceEntry.Data" style="width: 130px"></InputText> km</p>
+        @if ( !string.IsNullOrEmpty( DistanceEntry.Data) && !int.TryParse(DistanceEntry.Data, out var _) )
+        {
+            <p class="red">Distans ska vara numeriskt i kilometer.</p>
+        }
+        <p>Datum: <InputText class="editbox" @bind-Value="DateEntry.Data" style="width: 130px"></InputText></p>
+        <p>Väder: <InputText class="editbox" @bind-Value="WeatherEntry.Data" style="width: 250px"></InputText></p>
+
+        @{
+            var titlePickerText = TitleImageEntry.Entry.Data != null ? TitleImageEntry.Entry.Data : TitleImageEntry.File?.Name != null ? TitleImageEntry.File.Name : "Välj bild";
+        }
+        <label for="title-image-file" class="image-editbox">@titlePickerText</label>
+        <InputFile id="title-image-file" OnChange="@((e) => LoadFile(e, null))" class="hidden"></InputFile>
+
+        <Plk.Blazor.DragDrop.Dropzone TItem="ArticleEntryUIObject" Items="ArticleEntries">
+            <ChildContent Context="entry">
+                @if (entry.Entry.Type == "Header1")
+                {
+                    <div class="entry-wrapper">
+                        <div class="remove-button" @onclick="@(() => RemoveEntry(entry))">x</div>
+                        <h2 class="header-editbox"><InputText class="editbox" @bind-Value="entry.Entry.Data"></InputText></h2>
+                    </div>
+                }
+                else if (entry.Entry.Type == "Text")
+                {
+                    <div class="text-editor-wrapper entry-wrapper">
+                        <div class="remove-button" @onclick="@(() => RemoveEntry(entry))">x</div>
+                        <InputTextArea @bind-Value="entry.Entry.Data"></InputTextArea>
+                        @*<TextEditor @ref="@entry.Editor" Content="@entry.Entry.Data"></TextEditor>*@
+                    </div>
+                }
+                else if (entry.Entry.Type == "Image")
+                {
+                    var imagePickerText = entry.Entry.Data != null ? entry.Entry.Data : entry.File?.Name != null ? entry.File.Name : "Välj bild";
+                    var pickerId = $"image-file-{entry.Index}";
+                    <div class="entry-wrapper">
+                        <div class="remove-button" @onclick="@(() => RemoveEntry(entry))">x</div>
+                        <label for="@pickerId" class="image-editbox" style="margin-bottom: 10px;">@imagePickerText</label>
+                        <InputFile id="@pickerId" OnChange="@((e) => LoadFile(e, entry.Index))" class="hidden"></InputFile>
+                        <InputText class="editbox" @bind-Value="entry.Entry.SubData" style="width: 500px" placeholder="Bildtext..."></InputText>
+                    </div>
+                }
+                else if (entry.Entry.Type == "Video")
+                {
+                    <div class="entry-wrapper">
+                        <div class="remove-button" @onclick="@(() => RemoveEntry(entry))">x</div>
+                        <h2 class="header-editbox"><InputText class="editbox" @bind-Value="entry.Entry.Data"></InputText></h2>
+                        <InputText class="editbox" @bind-Value="entry.Entry.SubData" style="width: 500px" placeholder="Videotext..."></InputText>
+                    </div>
+                }
+            </ChildContent>
+        </Plk.Blazor.DragDrop.Dropzone>
+
+        <div class="entry-toolbox">
+            <div @onclick="@(() => InsertEntry("Header1"))">
+                <i class="fas fa-heading fa-3x"></i>
+            </div>
+            <div @onclick="@(() => InsertEntry("Text"))">
+                <i class="fas fa-align-left fa-3x"></i>
+            </div>
+            <div @onclick="@(() => InsertEntry("Image"))">
+                <i class="far fa-image fa-3x"></i>
+            </div>
+            <div @onclick="@(() => InsertEntry("Video"))">
+                <i class="fab fa-youtube fa-3x"></i>
+            </div>
+            <div style="margin-left: 20px;" @onclick="Save">
+                <i class="far fa-check-circle fa-3x"></i>
+            </div>
+            <div style="margin-left: 20px;" @onclick="RemoveUnusedImagesOnAzureBlobStorage">
+                <i class="fas fa-exclamation fa-3x"></i>
+            </div>
+        </div>
+    </EditForm>
+
+    @if (IsSaving)
+    {
+        <div class="save-in-progress">
+            <i class="fas fa-cloud-upload-alt fa-3x"></i>
+        </div>
+    }
+}
+else
+{
+    <p>Gå iväg! Du är inte jag! Eller logga in.</p>
+}

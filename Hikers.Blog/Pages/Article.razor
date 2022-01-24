@@ -1,0 +1,204 @@
+﻿@inherits ArticleBase
+@page "/{blogname}/{urlName}"
+@using HikersBlog.Misc.Extensions
+@*@attribute [Authorize]*@
+
+@*<AuthorizeView>*@
+      @*<Authorized>*@
+<EditForm Model="@this">
+    @if (Article != null)
+    {
+
+        var titleImage = Article.Entries.FirstOrDefault(ae => ae.Type == "TitleImage");
+        var distance = Article.Entries.FirstOrDefault(ae => ae.Type == "Distance");
+        var date = Article.Entries.FirstOrDefault(ae => ae.Type == "Date");
+        var route = Article.Entries.FirstOrDefault(ae => ae.Type == "Route");
+        var weather = Article.Entries.FirstOrDefault(ae => ae.Type == "Weather");
+
+        <h2>Dag @date.SubData: @route.Data @(!string.IsNullOrEmpty(@route.SubData) ? "-" : string.Empty) @route.SubData</h2>
+        <p style="margin: 0">Distans: @distance.Data?.Trim() km</p>
+        <p>Datum: @date.Data</p>
+        <p>Väder: @weather.Data</p>
+
+        <div class="prev-next-articles-container">
+            @if (Article.PreviousArticle != null)
+            {
+                var url = $"{Blogname}/{Article.PreviousArticle}";
+                <a href="@url" @onclick="@(() => GoToDay(Article.PreviousArticle))"><span>&lt; Dag @(int.Parse(date.SubData) - 1) </span></a>
+            }
+            else
+            {
+                <a href="#"></a>
+            }
+
+            @if (Article.NextArticle != null)
+            {
+                var url = $"{Blogname}/{Article.NextArticle}";
+                <a href="@url" @onclick="@(() => GoToDay(Article.NextArticle))"><span>Dag @(int.Parse(date.SubData) + 1) &gt; </span></a>
+            }
+        </div>
+
+        @if (titleImage != null)
+        {
+            <div class="article-img">
+                @{
+                    var src = $"https://hikersblogstorage.blob.core.windows.net/images/{Username}/{Blogname}/{titleImage.Data}";
+                }
+
+                <a href="@src" target="_blank">
+                    <img src="@src">
+                </a>
+            </div>
+        }
+
+        foreach (var entry in Article.Entries.Where(ae => ae.Priority >= 0).OrderBy(ae => ae.Priority))
+        {
+            @if (entry.Type == "Text")
+            {
+                <p>
+                    @((MarkupString)entry.Data)
+                </p>
+            }
+            else if (entry.Type == "Header1")
+            {
+                <h2>
+                    @entry.Data
+                </h2>
+            }
+            else if (entry.Type == "Image")
+            {
+                <div class="article-img">
+                    @{
+                        var src = $"https://hikersblogstorage.blob.core.windows.net/images/{Username}/{Blogname}/{entry.Data}";
+                    }
+
+                    <a href="@src" target="_blank">
+                        <img src="@src">
+                    </a>
+                    <figcaption>@entry.SubData</figcaption>
+                </div>
+            }
+            else if (entry.Type == "Video")
+            {
+                <div class="article-img">
+                    @{
+                        var src = $"https://hikersblogstorage.blob.core.windows.net/images/{Username}/{Blogname}/{entry.Data}";
+                    }
+
+                    <div class="video-iframe-wrapper">
+                        <iframe src="https://www.youtube.com/embed/@entry.Data?rel=0&showinfo=0&modestbranding=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <figcaption>@entry.SubData</figcaption>
+                </div>
+            }
+        }
+
+        <div class="article-updated">Artikeln senast uppdaterad: @Article.Timestamp.ToTimeAgo()</div>
+
+        <div class="prev-next-articles-container">
+            @if (Article.PreviousArticle != null)
+            {
+                var url = $"{Blogname}/{Article.PreviousArticle}";
+                <a href="@url" @onclick="@(() => GoToDay(Article.PreviousArticle))"><span>&lt; Dag @(int.Parse(date.SubData) - 1) </span></a>
+            }
+            else
+            {
+                <a href="#"></a>
+            }
+
+            @if (Article.NextArticle != null)
+            {
+                var url = $"{Blogname}/{Article.NextArticle}";
+                <a href="@url" @onclick="@(() => GoToDay(Article.NextArticle))"><span>Dag @(int.Parse(date.SubData) + 1) &gt; </span></a>
+            }
+        </div>
+
+        <hr />
+
+        <div class="reaction-section">
+            <h2 class="like-and-comment-header">Gilla och kommentera</h2>
+            @{
+                var articleLiked = Article.Likes.Any(l => l.ExternalUserId == ApplicationState.ExternalUser?.Id);
+            }
+
+            @if (articleLiked)
+            {
+                <span class="heart red" @onclick="LikeArticle">
+                    <i class="fas fa-heart fa-2x"></i>
+                </span>
+            }
+            else
+            {
+                <span class="heart" @onclick="LikeArticle">
+                    <i class="far fa-heart fa-2x"></i>
+                </span>
+            }
+
+            <span @onclick="@(() => SetCommentContext(Article.Id, null))">
+                <i class="far fa-comment fa-2x"></i>
+            </span>
+
+            @if (ApplicationState.ExternalUser != null)
+            {
+                <span class="logout-external-user" @onclick="DisconnectExternalLogin">[Logga av]</span>
+            }
+
+            @if (ApplicationState.ExternalUser == null)
+            {
+                <div class="please-login-box">
+                    <span class="login-text">Psst... Du måste vara inloggad:</span>
+                    <span class="login-provider" @onclick="LoginFacebook">
+                        <i class="fab fa-facebook fa-2x"></i>
+                    </span>
+                      <span class="login-provider" @onclick="LoginGoogle">
+                        <i class="fab fa-google fa-2x"></i>
+                    </span>
+                </div>
+            }
+        </div>
+
+        @if (Article.Likes.Any())
+        {
+            <div class="liked-by">
+                @if (Article.Likes.Count() <= 3)
+                {
+                    <span>Gillas av </span>
+                    @foreach (var liker in Article.Likes)
+                    {
+                        <strong>@liker.ExternalUser.Name</strong>
+                    }
+                }
+            </div>
+        }
+
+        <div class="comment-section">
+            <h2>Kommentarer (@(Article.Comments.Count()))</h2>
+            <div class="comment-input-container">
+                <InputTextAreaResponsive id="comment-textarea" class="comment-textarea form-control" @bind-Value="CommentContext.Content" rows="4" ref="CommentTextArea" disabled="@(ApplicationState.ExternalUser == null)" />
+                <button class="btn btn-success" @onclick="@(() => this.Comment())" disabled="@(string.IsNullOrWhiteSpace(CommentContext.Content) || ApplicationState.ExternalUser == null)">Kommentera</button>
+            </div>
+
+            @foreach (var comment in Article.Comments.Where(c => c.ParentId == null))
+            {
+                <Comment CommentObject="@comment" MeUser="@ApplicationState.ExternalUser" Like="@((c) => LikeComment(c))" SetCommentContextCommentId="@((c) => SetCommentContext(null, c))" />
+
+                @foreach (var subComment in Article.Comments.Where(c => c.ParentId == comment.Id))
+                {
+                    <Comment CommentObject="@subComment" MeUser="@ApplicationState.ExternalUser" IsSubComment="true" Like="@((c) => LikeComment(c))" SetCommentContextCommentId="@((c) => SetCommentContext(null, c))" />
+                }
+            }
+        </div>
+
+        @if (ApplicationState.IsOwnBlog)
+        {
+            <div class="logged-in-controls">
+                <span @onclick="NewArticle">
+                    <i class="fas fa-plus fa-2x"></i>
+                </span>
+                <span @onclick="EditArticle">
+                    <i class="fas fa-edit fa-2x"></i>
+                </span>
+            </div>
+        }
+    }
+</EditForm>

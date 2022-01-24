@@ -1,0 +1,21 @@
+﻿@inherits MainLayoutBase
+
+<CascadingValue Value="ApplicationState">
+    <PageTitle>Fjälläventyret</PageTitle>
+
+    <div class="page">
+        <div class="top-row px-4 auth">
+            <a class="navbar-brand" href=""><img src="logo2.png" /></a>
+        </div>
+
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+        <main>
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+</CascadingValue>

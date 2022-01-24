@@ -1,0 +1,41 @@
+﻿@using HikersBlog.Misc.Extensions
+@inherits CommentBase
+
+<div class="comment-container @(IsSubComment ? "sub-comment" : string.Empty)">
+    <div class="comment-image">
+        <img src="@CommentObject.ExternalUser.ImageUrl">
+    </div>
+    <div class="comment-content">
+        <div>
+            <strong>@CommentObject.ExternalUser.Name</strong> 
+            @if (CommentObject.ParentCommentExternalUser != null)
+            {
+                <span class="at-parent-commenter-name">@@@CommentObject.ParentCommentExternalUser.Name</span>
+            }
+            <span class="comment-string">@CommentObject.Content</span>
+        </div>
+        <div class="time-and-likes">
+            <span>@CommentObject.Timestamp.ToTimeAgo()</span>
+            <span>
+                @if (CommentObject.Likes?.Any() ?? false)
+                {
+                    <span>
+                        <i class="fas fa-heart"></i>
+                    </span>
+                    <span>x @CommentObject.Likes.Count()</span>
+                }
+            </span>
+            <span class="comment-like" @onclick="@(async () => await Like.InvokeAsync(CommentObject.Id))">
+                @{
+                    var likeText = string.Empty;
+                    if (MeUser != null)
+                    {
+                        likeText = (CommentObject.Likes?.Any(l => l.ExternalUser.Id == MeUser?.Id) ?? false) ? "Gilla inte" : "Gilla";
+                    }
+                }
+                @likeText
+            </span>
+            <span class="comment-reply" @onclick="@(async () => await SetCommentContextCommentId.InvokeAsync(CommentObject.Id))">Svara</span>
+        </div>
+    </div>
+</div>

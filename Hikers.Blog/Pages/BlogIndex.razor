@@ -1,0 +1,79 @@
+﻿@inherits BlogIndexBase
+@page "/{blogname}"
+@page "/blog/{blogname}"
+
+@if (Article != null)
+{
+    foreach (var entry in Article.Entries.Where(ae => ae.Priority >= 0).OrderBy(ae => ae.Priority))
+    {
+        @if (entry.Type == "Text")
+        {
+            <p>
+                @((MarkupString)entry.Data)
+            </p>
+        }
+        else if (entry.Type == "Header1")
+        {
+            <h2>
+                @entry.Data
+            </h2>
+        }
+        else if (entry.Type == "Image")
+        {
+            <div class="article-img">
+                @{
+                    var src = $"https://hikersblogstorage.blob.core.windows.net/images/{Username}/{Blogname}/{entry.Data}";
+                }
+
+                <a href="@src" target="_blank">
+                    <img src="@src">
+                </a>
+                <figcaption>@entry.SubData</figcaption>
+            </div>
+        }
+        else if (entry.Type == "Video")
+        {
+            <div class="article-img">
+                @{
+                    var src = $"https://hikersblogstorage.blob.core.windows.net/images/{Username}/{Blogname}/{entry.Data}";
+                }
+
+                <div class="video-iframe-wrapper">
+                    <iframe src="https://www.youtube.com/embed/@entry.Data?rel=0&showinfo=0&modestbranding=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <figcaption>@entry.SubData</figcaption>
+            </div>
+        }
+        else if (entry.Type == "ArticleGrp")
+        {
+            var allArticleGroups = Article.Entries.Where(ae => ae.Type == "ArticleGrp").OrderBy(ae => int.Parse(ae.Data.Split('-').First())).ToList();
+            var index = allArticleGroups.IndexOf(allArticleGroups.FirstOrDefault(ae => ae.Type == "ArticleGrp" && ae.Data == entry.Data));
+
+            <div class="article-group">
+                <h2>
+                    Etapp @(index + 1): @entry.SubData
+                </h2>
+
+                @{
+                    var minArticleIndex = int.Parse(entry.Data.Split('-').First());
+                    var maxArticleIndex = int.Parse(entry.Data.Split('-').Last());
+                }
+                @foreach (var article in BlogArticles.Where(a => a.Type == "Hike"))
+                {
+                    var dateEntry = article.Entries.FirstOrDefault(ae => ae.Type == "Date");
+                    var articleIndex = int.Parse(dateEntry.SubData);
+                    if (articleIndex >= minArticleIndex && articleIndex <= maxArticleIndex)
+                    {
+                        var routeEntry = article.Entries.FirstOrDefault(ae => ae.Type == "Route");
+                        var distanceEntry = article.Entries.FirstOrDefault(ae => ae.Type == "Distance");
+                        var distanceString = int.TryParse(distanceEntry.Data, out var distanceInt) && distanceInt > 0 ? $", {distanceInt} km" : "";
+
+                        <div>
+                            <a href="@Blogname/@article.UrlName">Dag @dateEntry.SubData: @routeEntry.Data@(!string.IsNullOrEmpty(routeEntry.SubData) ? $" - {routeEntry.SubData}" : "")@distanceString</a>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    }
+}

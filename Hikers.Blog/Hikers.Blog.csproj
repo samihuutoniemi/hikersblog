@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>aspnet-HikersBlog-819033D5-F3C6-4467-81C6-6BAB67B85643</UserSecretsId>
+		<RootNamespace>HikersBlog</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="blazor-dragdrop" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.1" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="2.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\HikersBlog.DAL\HikersBlog.DAL.csproj" />
+		<ProjectReference Include="..\HikersBlog.Domain\HikersBlog.Domain.csproj" />
+		<ProjectReference Include="..\HikersBlog.Misc\HikersBlog.Misc.csproj" />
+		<ProjectReference Include="..\HikersBlog.Storage\HikersBlog.Storage.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,9 @@
+﻿@inherits IndexBase
+@page "/"
+
+<PageTitle>Index</PageTitle>
+
+@if (ApplicationState.Profile != null)
+{
+    <h1>Hello, @ApplicationState.Profile.Name</h1>
+}
