@@ -214,11 +214,7 @@ public class ArticleBase : ComponentBase
     {
         var source = ApplicationState.ExternalUser?.Source;
 
-        if (source == "Facebook")
-        {
-            ExternalUserRepository.Forget(ApplicationState.ExternalUser);
-            await DisconnectExternalLogin();
-            //NavigationManager.NavigateTo("/facebook/privacypolicy");
-        }
+        ExternalUserRepository.Forget(ApplicationState.ExternalUser);
+        await DisconnectExternalLogin();
     }
 }

@@ -189,14 +189,16 @@
             }
         </div>
 
-        @if (ApplicationState.ExternalUser != null && ApplicationState.ExternalUser.Source == "Facebook")
-        {
-            <div class="page-footer">
-                <span>2022 Sami Huutoniemi</span><span class="pipe">|</span>
-                <span class="privacypolicy-external-user" @onclick="ViewPrivacyPolicy">Privacy Policy</span><span class="pipe">|</span>
+        <div class="page-footer">
+            <span>2022 Sami Huutoniemi</span><span class="pipe">|</span>
+            <span class="privacypolicy-external-user" @onclick="ViewPrivacyPolicy">Privacy Policy</span>
+            @if (ApplicationState.ExternalUser != null)
+            {
+                <span class="pipe">|</span>
                 <span class="privacypolicy-external-user" @onclick="ForgetMe">Glöm mig</span>
-            </div>
-        }
+
+            }
+        </div>
 
         @if (ApplicationState.IsOwnBlog)
         {
