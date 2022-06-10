@@ -58,4 +58,28 @@ public class ExternalUserRepository : IExternalUserRepository
 
         return eu;
     }
+
+    public ExternalUser Forget(ExternalUser externalUser)
+    {
+        var eu = Get(externalUser.ExternalId);
+
+        if (eu == null)
+        {
+            eu = externalUser;
+            _context.Add(eu);
+        }
+        else
+        {
+            eu.Name = "Raderad användare";
+            eu.ImageUrl = null;
+            eu.Email = null;
+            eu.AccessToken = externalUser.AccessToken;
+            eu.AccessTokenExpiresAt = externalUser.AccessTokenExpiresAt;
+            eu.RefreshToken = externalUser.RefreshToken;
+        }
+
+        _context.SaveChanges();
+
+        return eu;
+    }
 }

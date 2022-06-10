@@ -65,8 +65,23 @@ h1:focus {
         content: "An error has occurred."
     }
 
+.page-footer {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+    .page-footer > .pipe {
+        cursor: default;
+        color: #b3b3b3;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+
 .hidden {
-    opacity:0;
+    opacity: 0;
     /*display: none;*/
 }
 

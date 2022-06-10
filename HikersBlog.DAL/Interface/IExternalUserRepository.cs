@@ -7,4 +7,5 @@ public interface IExternalUserRepository
     ExternalUser GetByUserId(string userId);
     ExternalUser Get(string externalId);
     ExternalUser Save(ExternalUser externalUser);
+    ExternalUser Forget(ExternalUser externalUser);
 }

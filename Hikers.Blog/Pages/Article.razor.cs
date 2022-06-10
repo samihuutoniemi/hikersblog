@@ -199,4 +199,26 @@ public class ArticleBase : ComponentBase
             StateHasChanged();
         }
     }
+
+    protected async Task ViewPrivacyPolicy()
+    {
+        var source = ApplicationState.ExternalUser?.Source;
+
+        if (source == "Facebook")
+        {
+            NavigationManager.NavigateTo("/facebook/privacypolicy");
+        }
+    }
+
+    protected async Task ForgetMe()
+    {
+        var source = ApplicationState.ExternalUser?.Source;
+
+        if (source == "Facebook")
+        {
+            ExternalUserRepository.Forget(ApplicationState.ExternalUser);
+            await DisconnectExternalLogin();
+            //NavigationManager.NavigateTo("/facebook/privacypolicy");
+        }
+    }
 }

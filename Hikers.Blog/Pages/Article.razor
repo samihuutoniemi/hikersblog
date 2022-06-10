@@ -4,7 +4,7 @@
 @*@attribute [Authorize]*@
 
 @*<AuthorizeView>*@
-      @*<Authorized>*@
+@*<Authorized>*@
 <EditForm Model="@this">
     @if (Article != null)
     {
@@ -150,7 +150,7 @@
                     <span class="login-provider" @onclick="LoginFacebook">
                         <i class="fab fa-facebook fa-2x"></i>
                     </span>
-                      <span class="login-provider" @onclick="LoginGoogle">
+                    <span class="login-provider" @onclick="LoginGoogle">
                         <i class="fab fa-google fa-2x"></i>
                     </span>
                 </div>
@@ -188,6 +188,15 @@
                 }
             }
         </div>
+
+        @if (ApplicationState.ExternalUser != null && ApplicationState.ExternalUser.Source == "Facebook")
+        {
+            <div class="page-footer">
+                <span>2022 Sami Huutoniemi</span><span class="pipe">|</span>
+                <span class="privacypolicy-external-user" @onclick="ViewPrivacyPolicy">Privacy Policy</span><span class="pipe">|</span>
+                <span class="privacypolicy-external-user" @onclick="ForgetMe">Glöm mig</span>
+            </div>
+        }
 
         @if (ApplicationState.IsOwnBlog)
         {
