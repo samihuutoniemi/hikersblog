@@ -1,6 +1,7 @@
 ﻿@inherits BlogIndexBase
 @page "/{blogname}"
 @page "/blog/{blogname}"
+@using HikersBlog.Misc.Extensions
 
 @if (Article != null)
 {
@@ -46,21 +47,43 @@
         }
         else if (entry.Type == "ArticleGrp")
         {
-            var allArticleGroups = Article.Entries.Where(ae => ae.Type == "ArticleGrp").OrderBy(ae => int.Parse(ae.Data.Split('-').First())).ToList();
-            var index = allArticleGroups.IndexOf(allArticleGroups.FirstOrDefault(ae => ae.Type == "ArticleGrp" && ae.Data == entry.Data));
+            @*  @if (ApplicationState.IsOwnBlog)
+            {
+                <div class="article-group-edit">
+                      <h2><InputText class="editbox" @bind-Value="DateEntry.SubData" style="width: 34px"></InputText>
+                    <span @onclick="NewArticle">
+                        <i class="fas fa-plus fa-2x"></i>
+                    </span>
+                    <span @onclick="EditArticle">
+                        <i class="fas fa-edit fa-2x"></i>
+                    </span>
+                </div>
+            }*@
+
+            var allArticleGroups = Article.Entries.Where(ae => ae.Type == "ArticleGrp").OrderBy(ae => int.Parse(ae.Data.SplitOnLastOccurence('-').First())).ToList();
+            var index = allArticleGroups.Where(ag => !ag.Data.StartsWith('-')).ToList().IndexOf(allArticleGroups.FirstOrDefault(ae => ae.Type == "ArticleGrp" && ae.Data == entry.Data));
 
             <div class="article-group">
                 <h2>
-                    Etapp @(index + 1): @entry.SubData
+                    @{
+                        var etapp = index >= 0 ? $"Etapp {index + 1}: " : "";
+                    }
+                    @etapp@entry.SubData
                 </h2>
 
                 @{
-                    var minArticleIndex = int.Parse(entry.Data.Split('-').First());
-                    var maxArticleIndex = int.Parse(entry.Data.Split('-').Last());
+                    var minArticleIndex = int.Parse(entry.Data.SplitOnLastOccurence('-').First());
+                    var maxArticleIndex = int.Parse(entry.Data.SplitOnLastOccurence('-').Last());
                 }
                 @foreach (var article in BlogArticles.Where(a => a.Type == "Hike"))
                 {
                     var dateEntry = article.Entries.FirstOrDefault(ae => ae.Type == "Date");
+
+                    if (dateEntry == null)
+                    {
+                        continue;
+                    }
+
                     var articleIndex = int.Parse(dateEntry.SubData);
                     if (articleIndex >= minArticleIndex && articleIndex <= maxArticleIndex)
                     {
@@ -76,4 +99,13 @@
             </div>
         }
     }
+
+    @* @if (ApplicationState.IsOwnBlog)
+        {
+            <div class="logged-in-controls">
+                <span @onclick="AddArticleGroup">
+                    <i class="fas fa-plus fa-2x"></i>
+                </span>
+            </div>
+        }*@
 }

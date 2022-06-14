@@ -1,5 +1,6 @@
 ﻿using HikersBlog.DAL.Interface;
 using HikersBlog.Domain.Misc;
+using HikersBlog.Domain.Models;
 using HikersBlog.Storage;
 using Microsoft.AspNetCore.Components;
 
@@ -65,4 +66,14 @@ public class BlogIndexBase : ComponentBase
 
         return base.OnParametersSetAsync();
     }
+
+    //protected void AddArticleGroup()
+    //{
+    //    var newArticleGroup = new ArticleEntry
+    //    {
+    //        Type = "ArticleGrp",
+            
+    //    };
+        
+    //}
 }

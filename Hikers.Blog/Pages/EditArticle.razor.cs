@@ -104,7 +104,7 @@ public class EditArticleBase : ComponentBase
 
             if (PreviousArticle?.UrlName != null && Regex.IsMatch(PreviousArticle.UrlName, @"\d+$"))
             {
-                var number = Regex.Match(PreviousArticle.UrlName, @"\d+$").Value;
+                var number = Regex.Match(PreviousArticle.UrlName, @"-?\d+$").Value;
                 Article.UrlName = $"{PreviousArticle.UrlName.Replace(number, (int.Parse(number) + 1).ToString())}";
             }
 
@@ -127,11 +127,13 @@ public class EditArticleBase : ComponentBase
         }
         else
         {
-            DateEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "Date");
-            RouteEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "Route");
-            DistanceEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "Distance");
-            WeatherEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "Weather");
-            TitleImageEntry = (Article.Entries.FirstOrDefault(ae => ae.Type == "TitleImage"), null);
+            DateEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "Date") ?? DateEntry;
+            RouteEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "Route") ?? RouteEntry;
+            DistanceEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "Distance") ?? DistanceEntry;
+            WeatherEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "Weather") ?? WeatherEntry;
+            TitleImageEntry = Article.Entries.FirstOrDefault(ae => ae.Type == "TitleImage") != null 
+                ? (Article.Entries.FirstOrDefault(ae => ae.Type == "TitleImage"), null)
+                : (TitleImageEntry.Entry, null);
 
             ArticleEntries = Article.Entries.Where(ae => ae.Priority > 0).OrderBy(ae => ae.Priority).Select((ae, i) => new ArticleEntryUIObject
             {
@@ -249,9 +251,16 @@ public class EditArticleBase : ComponentBase
 
         Article.Entries = entries;
 
-        ArticleRepository.SaveArticle(Article);
-        ArticleRepository.SetArticleNext(PreviousArticle.Id, Article.UrlName);
+        try
+        {
+            ArticleRepository.SaveArticle(Article);
+            ArticleRepository.SetArticleNext(PreviousArticle.Id, Article.UrlName);
 
+        }
+        catch
+        {
+
+        }
         //foreach (var entry in entries.Where(e => e.Type == "Image" || e.Type == "TitleImage"))
         //{
         //    var metaEntry = ArticleEntries.FirstOrDefault(ae => (ae.File?.Name ?? ae.Entry.Data) == entry.Data)

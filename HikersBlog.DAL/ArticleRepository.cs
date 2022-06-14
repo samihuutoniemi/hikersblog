@@ -136,6 +136,11 @@ public class ArticleRepository : IArticleRepository
             result.Comments ??= comments;
         }
 
+        if (result?.Comments != null)
+        {
+            result.Comments = result.Comments.Where(c => !c.ExternalUser.Banned).ToList();
+        }
+
         return result;
     }
 

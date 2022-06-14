@@ -16,9 +16,15 @@
         var weather = Article.Entries.FirstOrDefault(ae => ae.Type == "Weather");
 
         <h2>Dag @date.SubData: @route.Data @(!string.IsNullOrEmpty(@route.SubData) ? "-" : string.Empty) @route.SubData</h2>
-        <p style="margin: 0">Distans: @distance.Data?.Trim() km</p>
+        @if (!string.IsNullOrWhiteSpace(distance.Data))
+        {
+            <p style="margin: 0">Distans: @distance.Data?.Trim() km</p>
+        }
         <p>Datum: @date.Data</p>
-        <p>Väder: @weather.Data</p>
+        @if (!string.IsNullOrWhiteSpace(weather.Data))
+        {
+            <p>Väder: @weather.Data</p>
+        }
 
         <div class="prev-next-articles-container">
             @if (Article.PreviousArticle != null)
